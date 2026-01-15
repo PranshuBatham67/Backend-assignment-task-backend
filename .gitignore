@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Database
+*.sqlite3
+*.db
+backend_assignment.db
+
+# Logs
+logs/
+*.log
+
+# IDEs
+.vscode/
+.idea/
+.qodo/
+
+# Docker
+Dockerfile
+docker-compose.yml
+
+# OS generated files
+.DS_Store
+Thumbs.db
