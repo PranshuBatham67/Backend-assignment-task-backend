@@ -134,15 +134,21 @@ class EmailService:
             html_part = MIMEText(html_content, "html")
             message.attach(html_part)
             
-            # Send email
-            await aiosmtplib.send(
-                message,
+            # Clean password (remove spaces if App Password)
+            clean_password = self.smtp_password.replace(" ", "") if self.smtp_password else ""
+
+            # Use explicit SMTP client for better control
+            smtp = aiosmtplib.SMTP(
                 hostname=self.smtp_host,
                 port=self.smtp_port,
-                username=self.smtp_user,
-                password=self.smtp_password,
-                start_tls=True,
+                start_tls=False # We will manually start TLS
             )
+            
+            async with smtp:
+                await smtp.connect()
+                await smtp.starttls()
+                await smtp.login(self.smtp_user, clean_password)
+                await smtp.send_message(message)
             
             logger.info(f"Email sent successfully to {to_email}")
             return True

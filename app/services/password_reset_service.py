@@ -61,11 +61,14 @@ class PasswordResetService:
             self.db.commit()
             
             # Send OTP email
-            await email_service.send_password_reset_otp(
+            sent = await email_service.send_password_reset_otp(
                 to_email=user.email,
                 user_name=user.full_name or user.email,
                 otp_code=plain_otp
             )
+            
+            if not sent:
+                raise Exception("Failed to send email")
             
             logger.info(f"Password reset OTP sent to {email}")
             return True
@@ -73,7 +76,16 @@ class PasswordResetService:
         except Exception as e:
             logger.error(f"Error in password reset request: {str(e)}")
             self.db.rollback()
-            return True  # Still return True to not leak information
+            
+            # If email sending failed specifically, propagate the error
+            if str(e) == "Failed to send email":
+                from fastapi import HTTPException, status
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to send password reset email. Please try again later."
+                )
+                
+            return True  # For other errors (or user not found logic), return True to not leak information
     
     def verify_reset_token(self, token: str) -> Optional[User]:
         """
