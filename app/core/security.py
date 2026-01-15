@@ -3,6 +3,7 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 from app.config import settings
+import hashlib
 
 # Password hashing context - using bcrypt with cost factor 12
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -12,14 +13,19 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     Verify a plain password against a hashed password.
     Returns True if they match, False otherwise.
     """
-    return pwd_context.verify(plain_password, hashed_password)
+    # Pre-hash with SHA-256 to handle any password length
+    prehashed = hashlib.sha256(plain_password.encode('utf-8')).hexdigest()
+    return pwd_context.verify(prehashed, hashed_password)
 
 def get_password_hash(password: str) -> str:
     """
-    Hash a password using bcrypt.
-    The hash will be different each time due to the salt.
+    Hash a password using SHA-256 + bcrypt.
+    SHA-256 pre-hashing ensures passwords of any length can be hashed.
+    This is a standard approach recommended for bcrypt with long passwords.
     """
-    return pwd_context.hash(password)
+    # Pre-hash with SHA-256 to handle passwords longer than 72 bytes
+    prehashed = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    return pwd_context.hash(prehashed)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """
