@@ -25,7 +25,12 @@ class Settings(BaseSettings):
     API_V2_PREFIX: str = "/api/v2"
     
     # CORS - allowing frontend origins
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:5174"]
+    CORS_ORIGINS: List[str] = [
+        "http://localhost:3000", 
+        "http://localhost:5173", 
+        "http://localhost:5174",
+        "https://backend-assignment-task-frotend.onrender.com"
+    ]
     
     # Rate limiting
     RATE_LIMIT_PER_MINUTE: int = 100
